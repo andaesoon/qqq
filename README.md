@@ -28,7 +28,11 @@
         }
         #chat-display::-webkit-scrollbar-thumb:hover { background: #4338ca; }
         
-        #chat-display { scroll-behavior: smooth; }
+        #chat-display { 
+            scroll-behavior: smooth; 
+            overscroll-behavior-y: contain; /* 터치 스크롤 시 부모 요소 스크롤 방지 */
+            -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -81,7 +85,8 @@
     </div>
 
     <!-- Main Chat Window -->
-    <main id="chat-display" class="flex-1 overflow-y-auto p-4 space-y-10 relative bg-[#f8fafc]">
+    <!-- min-h-0을 추가하여 플렉스 박스 내에서 자식의 스크롤이 정상 작동하도록 보완함 -->
+    <main id="chat-display" class="flex-1 overflow-y-auto p-4 space-y-10 relative bg-[#f8fafc] min-h-0">
         <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         
         <div class="flex flex-col items-start message-appear relative z-10">
@@ -212,6 +217,15 @@
             document.getElementById('error-banner').classList.add('hidden');
         }
 
+        // 스크롤을 가장 아래로 내리는 함수
+        function scrollToBottom() {
+            const chat = document.getElementById('chat-display');
+            // 새 메시지가 렌더링된 후 스크롤을 이동시키기 위해 약간의 지연 시간을 둠
+            setTimeout(() => {
+                chat.scrollTop = chat.scrollHeight;
+            }, 100);
+        }
+
         async function handleSend() {
             const input = document.getElementById('text-input');
             const text = input.value.trim();
@@ -282,7 +296,7 @@
             `;
 
             chat.appendChild(wrap);
-            chat.scrollTop = chat.scrollHeight;
+            scrollToBottom(); // 메시지 추가 후 자동 스크롤 호출
         }
 
         document.getElementById('text-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
